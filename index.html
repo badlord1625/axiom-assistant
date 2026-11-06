@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b13">
+<title>AXIOM AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b13;color:#eaf0ff;font-family:Arial,sans-serif}
+header{padding:22px;text-align:center;border-bottom:1px solid #263044}
+h1{color:#68aaff;letter-spacing:5px;margin:5px}
+small{color:#8493aa}
+#chat{height:65vh;overflow:auto;padding:16px}
+.msg{padding:13px 16px;margin:12px 0;border-radius:15px;max-width:88%;line-height:1.5}
+.user{background:#174d83;margin-left:auto}
+.ai{background:#172033;margin-right:auto}
+.controls{position:fixed;bottom:0;background:#0d1422;width:100%;padding:14px;display:flex;gap:8px}
+input{min-width:0;flex:1;padding:14px;border-radius:12px;background:#172033;color:white;border:1px solid #34435e}
+button{border:0;border-radius:12px;padding:13px;background:#2879d0;color:white;font-weight:bold}
+#status{text-align:center;color:#68aaff;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>AXIOM</h1>
+<small>PERSONAL AI ASSISTANT</small>
+<p id="status">● Sistem hazır</p>
+</header>
+<div id="chat">
+<div class="msg ai">Merhaba. Ben AXIOM. Seni dinliyorum. Nasıl yardımcı olabilirim?</div>
+</div>
+<div class="controls">
+<input id="input" placeholder="AXIOM'a mesaj yaz..." />
+<button onclick="send()">➤</button>
+<button onclick="listen()">🎙</button>
+</div>
+<script>
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
+const status=document.getElementById("status");
+
+function add(text,type){
+ let d=document.createElement("div");
+ d.className="msg "+type;
+ d.textContent=text;
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+function answer(q){
+ let t=q.toLowerCase();
+ if(t.includes("merhaba")||t.includes("selam"))
+ return "Merhaba! Buradayım. Seni dinliyorum.";
+ if(t.includes("adın"))
+ return "Ben AXIOM. Kişisel asistanınım.";
+ if(t.includes("nasılsın"))
+ return "İyiyim. Sana yardımcı olmaya hazırım.";
+ if(t.includes("saat"))
+ return "Telefonunun saati: "+new Date().toLocaleTimeString("tr-TR");
+ if(t.includes("tarih"))
+ return "Bugünün tarihi: "+new Date().toLocaleDateString("tr-TR");
+ return "Mesajını aldım. Şimdilik temel moddayım. İnternet bağlantılı yapay zekâ sistemim sonraki aşamada eklenecek.";
+}
+
+function send(){
+ let q=input.value.trim();
+ if(!q)return;
+ add(q,"user");
+ input.value="";
+ let a=answer(q);
+ setTimeout(()=>{
+ add(a,"ai");
+ },300);
+}
+
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter")send();
+});
+
+function listen(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){
+ status.textContent="Ses tanıma bu tarayıcıda desteklenmiyor.";
+ return;
+ }
+ const rec=new SR();
+ rec.lang="tr-TR";
+ rec.onstart=()=>status.textContent="● Seni dinliyorum...";
+ rec.onresult=e=>{
+ input.value=e.results[0][0].transcript;
+ send();
+ };
+ rec.onerror=()=>status.textContent="Mikrofon kullanılamadı.";
+ rec.onend=()=>status.textContent="● Sistem hazır";
+ rec.start();
+}
+
+</script>
+</body>
+</html>
