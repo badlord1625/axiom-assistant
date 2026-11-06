@@ -2,100 +2,251 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080b13">
-<title>AXIOM AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#080914">
+<title>AXIOM 2.0</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080b13;color:#eaf0ff;font-family:Arial,sans-serif}
-header{padding:22px;text-align:center;border-bottom:1px solid #263044}
-h1{color:#68aaff;letter-spacing:5px;margin:5px}
-small{color:#8493aa}
-#chat{height:65vh;overflow:auto;padding:16px}
-.msg{padding:13px 16px;margin:12px 0;border-radius:15px;max-width:88%;line-height:1.5}
-.user{background:#174d83;margin-left:auto}
-.ai{background:#172033;margin-right:auto}
-.controls{position:fixed;bottom:0;background:#0d1422;width:100%;padding:14px;display:flex;gap:8px}
-input{min-width:0;flex:1;padding:14px;border-radius:12px;background:#172033;color:white;border:1px solid #34435e}
-button{border:0;border-radius:12px;padding:13px;background:#2879d0;color:white;font-weight:bold}
-#status{text-align:center;color:#68aaff;font-size:12px}
+body{
+ margin:0;background:#080914;color:#f4f5ff;
+ font-family:Inter,Arial,sans-serif;
+ min-height:100vh;overflow:hidden
+}
+header{
+ height:65px;display:flex;align-items:center;
+ justify-content:space-between;padding:0 20px;
+ border-bottom:1px solid #25253b;
+ background:#0c0d1b
+}
+.logo{font-size:23px;font-weight:900;letter-spacing:5px;
+ background:linear-gradient(90deg,#55caff,#a17bff);
+ color:transparent;background-clip:text}
+.status{font-size:11px;color:#7f91ad}
+main{height:calc(100dvh - 155px);overflow:auto;padding:15px}
+.hero{text-align:center;padding:12px 0 20px}
+.orb{
+ width:145px;height:145px;margin:5px auto 18px;
+ border-radius:50%;position:relative;
+ background:radial-gradient(circle at 35% 30%,#d5f8ff 0%,#64baff 12%,#6655ef 42%,#181039 72%);
+ box-shadow:0 0 25px #596aff,0 0 65px #4434bb66,
+ inset -12px -15px 30px #080914;
+ animation:float 4s ease-in-out infinite;
+}
+.orb:before{
+ content:"";position:absolute;inset:-9px;border-radius:50%;
+ border:1px solid #8b9cff66;
+ box-shadow:0 0 22px #6379ff55;
+ animation:spin 9s linear infinite
+}
+.orb:after{
+ content:"";position:absolute;inset:13px;border-radius:50%;
+ border:1px solid #ffffff55;
+}
+@keyframes float{50%{transform:translateY(-9px) scale(1.04)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero h2{font-size:25px;letter-spacing:3px;margin:8px}
+.hero p{color:#858ca9;font-size:13px}
+.pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.pill{font-size:11px;color:#9bb6ff;border:1px solid #33385e;
+ border-radius:30px;padding:7px 12px;background:#15162a}
+#chat{max-width:650px;margin:auto;padding-bottom:20px}
+.msg{padding:13px 16px;border-radius:17px;margin:12px 0;
+ max-width:88%;line-height:1.55;font-size:14px;
+ white-space:pre-wrap;overflow-wrap:anywhere}
+.ai{background:#17192e;border:1px solid #292b49}
+.user{background:linear-gradient(120deg,#3435a1,#1768a6);margin-left:auto}
+#suggestions{display:flex;gap:8px;overflow:auto;padding:8px 0}
+#suggestions button{white-space:nowrap}
+button{cursor:pointer;color:white;background:#20223e;
+ border:1px solid #41446d;border-radius:12px;padding:11px}
+button:active{transform:scale(.96)}
+.bottom{
+ position:fixed;bottom:0;left:0;right:0;
+ background:#0d0e1c;border-top:1px solid #292a43;
+ padding:12px 13px calc(12px + env(safe-area-inset-bottom))
+}
+.composer{display:flex;gap:8px;max-width:750px;margin:auto}
+input{
+ flex:1;min-width:0;background:#17192c;color:white;
+ border:1px solid #383b60;border-radius:15px;
+ padding:15px;font-size:14px;outline:none
+}
+.send{background:linear-gradient(130deg,#6255e9,#247fd9);
+ border:0;font-size:19px;width:49px}
+.mic{background:#272343;border:1px solid #6152aa;font-size:18px}
+.tools{display:flex;justify-content:center;gap:10px;margin-top:9px}
+.tools button{font-size:11px;color:#aeb9dc;padding:7px 12px}
+.modal{display:none;position:fixed;inset:0;background:#000b;
+ align-items:center;justify-content:center;padding:20px;z-index:5}
+.panel{background:#17192c;border:1px solid #42446a;
+ border-radius:20px;padding:20px;width:100%;max-width:400px}
+.panel textarea{width:100%;height:100px;background:#090b18;
+ color:white;border:1px solid #41446d;border-radius:12px;
+ padding:12px;margin:12px 0}
 </style>
 </head>
 <body>
 <header>
-<h1>AXIOM</h1>
-<small>PERSONAL AI ASSISTANT</small>
-<p id="status">● Sistem hazır</p>
+ <div class="logo">AXIOM</div>
+ <div class="status">● PERSONAL AI 2.0</div>
+ <button onclick="clearChat()">↻</button>
 </header>
-<div id="chat">
-<div class="msg ai">Merhaba. Ben AXIOM. Seni dinliyorum. Nasıl yardımcı olabilirim?</div>
+
+<main>
+ <section class="hero">
+  <div class="orb"></div>
+  <h2>Merhaba, ben AXIOM.</h2>
+  <p>Buradayım kardeşim. Seni dinliyorum.</p>
+  <div class="pills">
+   <span class="pill">✦ Akıllı asistan</span>
+   <span class="pill">◉ Sesli mod</span>
+   <span class="pill">⌁ Kişisel hafıza</span>
+  </div>
+ </section>
+
+ <div id="chat"></div>
+
+ <div id="suggestions">
+  <button onclick="quick('Bana kendini tanıt')">Beni tanı</button>
+  <button onclick="quick('Bugünün tarihini söyle')">Tarih</button>
+  <button onclick="imageMode()">🎨 Görsel oluştur</button>
+ </div>
+</main>
+
+<div class="bottom">
+ <div class="composer">
+  <input id="input" placeholder="Kardeşim, ne yapıyoruz?">
+  <button class="mic" onclick="listen()">🎙</button>
+  <button class="send" onclick="send()">➤</button>
+ </div>
+ <div class="tools">
+  <button onclick="imageMode()">🎨 Görsel üretimi</button>
+  <button onclick="speakToggle()">🔊 Sesli yanıt</button>
+ </div>
 </div>
-<div class="controls">
-<input id="input" placeholder="AXIOM'a mesaj yaz..." />
-<button onclick="send()">➤</button>
-<button onclick="listen()">🎙</button>
+
+<div class="modal" id="imageModal">
+ <div class="panel">
+  <h3>🎨 AXIOM Görsel Atölyesi</h3>
+  <p style="color:#aab1d0;font-size:13px">
+  Oluşturmak istediğin resmi tarif et.
+  Gerçek görsel üretimi için sonraki aşamada görsel AI servisini bağlayacağız.
+  </p>
+  <textarea id="imagePrompt" placeholder="Örneğin: Geleceğin İstanbul'u, neon ışıklar..."></textarea>
+  <button onclick="saveImagePrompt()">Tarifi sohbete ekle</button>
+  <button onclick="closeImage()">Kapat</button>
+ </div>
 </div>
+
 <script>
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
-const status=document.getElementById("status");
+let voice=true;
 
-function add(text,type){
- let d=document.createElement("div");
+function add(text,type,save=true){
+ const d=document.createElement("div");
  d.className="msg "+type;
  d.textContent=text;
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
+ if(save)saveChat();
+}
+
+function saveChat(){
+ localStorage.setItem("axiom_history",chat.innerHTML);
+}
+
+function loadChat(){
+ const old=localStorage.getItem("axiom_history");
+ if(old)chat.innerHTML=old;
+ else add("Selam kardeşim! Ben AXIOM. Artık buradayım. Ne yapmak istersin?", "ai");
 }
 
 function answer(q){
- let t=q.toLowerCase();
+ const t=q.toLocaleLowerCase("tr-TR");
  if(t.includes("merhaba")||t.includes("selam"))
- return "Merhaba! Buradayım. Seni dinliyorum.";
+ return "Selam kardeşim! Nasılsın, bugün neler yapıyoruz?";
  if(t.includes("adın"))
- return "Ben AXIOM. Kişisel asistanınım.";
+ return "Ben AXIOM. Senin kişisel asistanın ve yol arkadaşınım.";
  if(t.includes("nasılsın"))
- return "İyiyim. Sana yardımcı olmaya hazırım.";
- if(t.includes("saat"))
- return "Telefonunun saati: "+new Date().toLocaleTimeString("tr-TR");
+ return "Gayet iyiyim kardeşim. Sen nasılsın?";
  if(t.includes("tarih"))
  return "Bugünün tarihi: "+new Date().toLocaleDateString("tr-TR");
- return "Mesajını aldım. Şimdilik temel moddayım. İnternet bağlantılı yapay zekâ sistemim sonraki aşamada eklenecek.";
+ if(t.includes("saat"))
+ return "Şu an saat: "+new Date().toLocaleTimeString("tr-TR");
+ if(t.includes("resim")||t.includes("görsel"))
+ return "Görsel atölyesini açabiliriz kardeşim. Gerçek üretim motorunu henüz bağlamadık.";
+ if(t.includes("yardım"))
+ return "Buradayım! Sohbet edebilir, tarih ve saat öğrenebilir, sesli konuşabilirsin. Gerçek AI bağlantısı sonraki aşamada eklenecek.";
+ return "Mesajını aldım kardeşim. Şu anda temel moddayım. Gerçek yapay zekâ bağlantısı kurulduğunda sorularını anlayıp çok daha doğal cevap verebileceğim.";
 }
 
 function send(){
- let q=input.value.trim();
+ const q=input.value.trim();
  if(!q)return;
  add(q,"user");
  input.value="";
- let a=answer(q);
+ const response=answer(q);
  setTimeout(()=>{
- add(a,"ai");
- },300);
+ add(response,"ai");
+ if(voice)speak(response);
+ },350);
 }
 
+function quick(q){input.value=q;send()}
 input.addEventListener("keydown",e=>{
  if(e.key==="Enter")send();
 });
 
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="tr-TR";
+ u.rate=1;
+ speechSynthesis.speak(u);
+}
+
+function speakToggle(){
+ voice=!voice;
+ alert(voice?"Sesli yanıt açık":"Sesli yanıt kapalı");
+}
+
 function listen(){
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){
- status.textContent="Ses tanıma bu tarayıcıda desteklenmiyor.";
- return;
- }
- const rec=new SR();
- rec.lang="tr-TR";
- rec.onstart=()=>status.textContent="● Seni dinliyorum...";
- rec.onresult=e=>{
+ if(!SR){alert("Bu tarayıcı ses tanımayı desteklemiyor.");return}
+ const r=new SR();
+ r.lang="tr-TR";
+ r.onresult=e=>{
  input.value=e.results[0][0].transcript;
  send();
  };
- rec.onerror=()=>status.textContent="Mikrofon kullanılamadı.";
- rec.onend=()=>status.textContent="● Sistem hazır";
- rec.start();
+ r.onerror=()=>alert("Mikrofon kullanılamadı.");
+ r.start();
 }
 
+function imageMode(){
+ document.getElementById("imageModal").style.display="flex";
+}
+function closeImage(){
+ document.getElementById("imageModal").style.display="none";
+}
+function saveImagePrompt(){
+ const p=document.getElementById("imagePrompt").value.trim();
+ if(!p)return;
+ closeImage();
+ add("Görsel isteğim: "+p,"user");
+ add("Tarifini kaydettim kardeşim. Gerçek görsel üretimi için üretim servisini bağlamamız gerekiyor.","ai");
+ document.getElementById("imagePrompt").value="";
+}
+function clearChat(){
+ if(confirm("Sohbet geçmişi silinsin mi?")){
+ chat.innerHTML="";
+ localStorage.removeItem("axiom_history");
+ add("Yeni bir başlangıç! Buradayım kardeşim.","ai");
+ }
+}
+loadChat();
 </script>
 </body>
 </html>
